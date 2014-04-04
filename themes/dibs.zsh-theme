@@ -1,55 +1,74 @@
 # ===================================================================================
 # PROMPT
 # ===================================================================================
-# {
 
-local current_date="%{$fg[green]%}%D%{$reset_color%}"
-local dash="%{$fg[red]%}-%{$reset_color%}"
-local current_time="%{$fg[magenta]%}%D{%I:%M:%S}%{$reset_color%}"
-local username="%{$fg[yellow]%}%n%{$reset_color%}"
-local at="%{$fg[red]%}@%{$reset_color%}"
-local host="%{$fg[cyan]%}%m%{$reset_color%}"
-local just_git_branch="%{$fg[white]%}[%{$fg[red]%}$(git branch 2>/dev/null | grep "^*" | colrm 1 2)%{$reset_color%}%{$fg[white]%}]%{$reset_color%}"
-local arrow="%{$fg[blue]%}>%{$reset_color%}"
-local current_dir="%{$fg[red]%}[%{$reset_color%}%{$fg[white]%}%~%{$fg[red]%}]%{$reset_color%}"
-local dollar="%{$fg[blue]%}$%{$reset_color%}"
+# Clean, simple, compatible and meaningful.
+# Tested on Linux, Unix and Windows under ANSI colors.
+# It is recommended to use with a dark background and the font Inconsolata.
+# Colors: black, red, green, yellow, *blue, magenta, cyan, and white.
+# 
+# http://ysmood.org/wp/2013/03/my-ys-terminal-theme/
+# Mar 2013 ys
 
-# PROMPT=$'\
-# ┌  ${current_date} ${dash} ${current_time} ${username}${at}${host} ${just_git_branch}\
-# └${arrow} ${current_dir} ${dollar} '
+# Machine name.
+function box_name {
+    [ -f ~/.box-name ] && cat ~/.box-name || hostname -s
+}
 
-PROMPT=$'\
-┌  ${current_date} ${dash} ${current_time} ${username}${at}${host} $(git_prompt_info)\
-└${arrow} ${current_dir} ${dollar} '
+# Directory info.
+local current_dir='${PWD/#$HOME/~}'
 
-    # https://github.com/magicmonty/bash-git-prompt
-    # The command below shows a prompt which contains git branch and other git info
-        # function git_prompt_command() 
-        # {
-        #     source ~/dibayendu/repositories/dotfiles/bash/gitprompt.sh
-        # }
-   
-    ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[green]%}["
-    ZSH_THEME_GIT_PROMPT_SUFFIX="]%{$reset_color%}"
-    ZSH_THEME_GIT_PROMPT_DIRTY=" %{$fg[red]%}*%{$fg[green]%}"
-    ZSH_THEME_GIT_PROMPT_CLEAN=""
-# }
+# Git info.
+local git_info='$(git_prompt_info)'
+ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg[white]%}on%{$reset_color%} git: %{$fg[cyan]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%} ⚡%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%} ✓%{$reset_color%}"
+
+ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[green]%} ✚"
+ZSH_THEME_GIT_PROMPT_MODIFIED="%{$fg[blue]%} ✹"
+ZSH_THEME_GIT_PROMPT_DELETED="%{$fg[red]%} ✖"
+ZSH_THEME_GIT_PROMPT_RENAMED="%{$fg[magenta]%} ➜"
+ZSH_THEME_GIT_PROMPT_UNMERGED="%{$fg[yellow]%} ═"
+ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✭"
+
+# ruby rvm info
+local rvm_ruby=''
+if which rvm-prompt &> /dev/null; then
+  rvm_ruby='%{$PR_RED%}‹$(rvm-prompt i v g s)›%{$PR_NO_COLOR%}'
+else
+  if which rbenv &> /dev/null; then
+    rvm_ruby='%{$PR_RED%}‹$(rbenv version | sed -e "s/ (set.*$//")›%{$PR_NO_COLOR%}'
+  fi
+fi
+
+# Prompt format: \n # USER at MACHINE in DIRECTORY on git:BRANCH STATE [TIME] \n $ 
+PROMPT="
+┌─ %{$terminfo[bold]$fg[blue]%}#%{$reset_color%} \
+%D{%a %b %d, %I:%M}%b with \
+%{$fg[cyan]%}%n \
+%{$fg[white]%}@ \
+%{$fg[green]%}$(box_name)\
+${git_info} \
+${rvm_ruby}
+└─ %{$fg[white]%}in \
+%{$terminfo[bold]$fg[yellow]%}${current_dir}%{$reset_color%} \
+%{$terminfo[bold]$fg[red]%}$ %{$reset_color%}"
 
 # ===================================================================================
 # directories shortcut using marks
 # ===================================================================================
-# {
-    export MARKPATH=$HOME/.marks
-    function jump { 
-        cd -P $MARKPATH/$1 2>/dev/null || echo "No such mark: $1"
-    }
-    function mark { 
-        mkdir -p $MARKPATH; ln -s $(pwd) $MARKPATH/$1
-    }
-    function unmark { 
-        rm -i $MARKPATH/$1 
-    }
-    function marks {
-        ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/ -/g' && echo
-    }
-# }
+
+export MARKPATH=$HOME/.marks
+function jump {
+    cd -P $MARKPATH/$1 2>/dev/null || echo "No such mark: $1"
+}
+function mark {
+    mkdir -p $MARKPATH; ln -s $(pwd) $MARKPATH/$1
+}
+function unmark {
+    rm -i $MARKPATH/$1 
+}
+function marks {
+    ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/ -/g' && echo
+}
