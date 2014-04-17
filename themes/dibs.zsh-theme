@@ -22,8 +22,8 @@ local current_dir='${PWD/#$HOME/~}'
 local git_info='$(git_prompt_info)'
 ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg[white]%}on%{$reset_color%} git: %{$fg[cyan]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%} ⚡%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%} ✓%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%}⚡%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%}✓%{$reset_color%}"
 
 ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[green]%} ✚"
 ZSH_THEME_GIT_PROMPT_MODIFIED="%{$fg[blue]%} ✹"
@@ -35,23 +35,24 @@ ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✭"
 # ruby rvm info
 local rvm_ruby=''
 if which rvm-prompt &> /dev/null; then
-  rvm_ruby='%{$PR_RED%}‹$(rvm-prompt i v g s)›%{$PR_NO_COLOR%}'
+  rvm_ruby='%{$PR_RED%}ruby: $(rvm-prompt i v g s)%{$PR_NO_COLOR%}'
 else
   if which rbenv &> /dev/null; then
-    rvm_ruby='%{$PR_RED%}‹$(rbenv version | sed -e "s/ (set.*$//")›%{$PR_NO_COLOR%}'
+    rvm_ruby='%{$PR_RED%}$(rbenv version | sed -e "s/ (set.*$//")%{$PR_NO_COLOR%}'
   fi
 fi
 
 # Prompt format: \n # USER at MACHINE in DIRECTORY on git:BRANCH STATE [TIME] \n $ 
 PROMPT="
-┌─ %{$terminfo[bold]$fg[blue]%}#%{$reset_color%} \
-%D{%a %b %d, %I:%M}%b with \
+%{$fg[white]%}┌─ %{$terminfo[bold]$fg[blue]%}#%{$reset_color%} \
+%D{%a %b %d, %Y %I:%M%p}%b \
 %{$fg[cyan]%}%n \
 %{$fg[white]%}@ \
 %{$fg[green]%}$(box_name)\
 ${git_info} \
-${rvm_ruby}
-└─ %{$fg[white]%}in \
+%{$fg[white]%}using ruby: \
+%{$fg[magenta]%}${rvm_ruby}
+%{$fg[white]%}└─ %{$fg[white]%}in \
 %{$terminfo[bold]$fg[yellow]%}${current_dir}%{$reset_color%} \
 %{$terminfo[bold]$fg[red]%}$ %{$reset_color%}"
 
